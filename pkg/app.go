@@ -61,7 +61,7 @@ func (app *App) Run() {
 	organizationRoutes := router.Group("/organization")
 	routes.SetupOrganizationRoutes(organizationRoutes, app.uco)
 
-	router.Run()
+	router.Run(":8080")
 }
 
 func (app *App) Close() {

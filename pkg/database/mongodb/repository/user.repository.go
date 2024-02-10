@@ -5,7 +5,6 @@ import (
 
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-	// "example/test/database/models"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"

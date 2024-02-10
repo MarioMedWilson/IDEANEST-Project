@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	// "example/test/database/models"
-	// "example/test/database/repository"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb/models"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb/repository"
 	"github.com/gin-gonic/gin"

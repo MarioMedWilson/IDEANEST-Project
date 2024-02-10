@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	// "example/test/database/models"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson/primitive"
