@@ -5,6 +5,7 @@ import (
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb/repository"
 	"github.com/gin-gonic/gin"
 	"net/http"
+
 )
 
 type OrganizationController struct {
@@ -76,11 +77,29 @@ func (oc *OrganizationController) GetOrganizationID(c *gin.Context) {
 func (oc *OrganizationController) InviteUser(c *gin.Context) {
 
 	var organizationMember models.OrganizationMember
+	var organizations []models.Organization
+	var err error
 	if err := c.ShouldBindJSON(&organizationMember); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}	
-	err := oc.OrganizationRepository.InviteUser(c, c.Param("id"), &organizationMember)
+	userID, _ := c.Get("user_id")
+	organizations, err = oc.OrganizationRepository.GetOrganizations(c, userID.(string))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	for _, organization := range organizations {
+		for _, member := range organization.OrganizationMembers {
+			if member.Email == organizationMember.Email {
+				c.JSON(http.StatusConflict, gin.H{"error": "User already in organization"})
+				return
+			}
+		}
+	}
+
+	err = oc.OrganizationRepository.InviteUser(c, c.Param("id"), &organizationMember)
 	
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

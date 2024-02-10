@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/utils"
+	"fmt"
 )
 
 type UserController struct {
@@ -25,6 +26,16 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	existingUser, err := uc.UserRepository.GetUserByEmail(c, user.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	fmt.Println(existingUser)
+	if existingUser != nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 		return
 	}
 
