@@ -8,7 +8,8 @@ import (
 	"os"
 	"github.com/gin-gonic/gin"
 	"net/http"
-
+	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb"
+	"context"
 )
 
 func GenerateRefreshToken(userID string) (string, error) {
@@ -18,8 +19,8 @@ func GenerateRefreshToken(userID string) (string, error) {
     log.Fatal("Error loading .env file")
   }
 	jwtSecret := []byte(os.Getenv("JWT_SECRET"))
-	
 	token := jwt.New(jwt.SigningMethodHS256)
+
 	claims := token.Claims.(jwt.MapClaims)
 	claims["exp"] = time.Now().Add(time.Hour * 24 * 7).Unix() // Refresh token expires in 7 days
 	claims["iat"] = time.Now().Unix()
@@ -30,9 +31,14 @@ func GenerateRefreshToken(userID string) (string, error) {
 		return "", err
 	}
 
+	// Save refresh token to Redis
+	redisClient := database.ConnectRedis()
+	err = redisClient.Set(context.Background(), userID, tokenString, time.Hour*24*7).Err()
+	if err != nil {
+		return "", err
+	}
 	return tokenString, nil
 }
-
 
 func RefreshTokenValidate(tokenString string, c *gin.Context ) {
 	if tokenString == "" {
@@ -40,8 +46,8 @@ func RefreshTokenValidate(tokenString string, c *gin.Context ) {
 		c.Abort()
 		return
 	}
+
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		// Add your secret key for token validation here
 		return []byte(os.Getenv("JWT_SECRET")), nil
 	})
 	if err != nil {
@@ -54,11 +60,22 @@ func RefreshTokenValidate(tokenString string, c *gin.Context ) {
 		c.Abort()
 		return
 	}
-
 	claims, ok := token.Claims.(jwt.MapClaims)
+	client := database.ConnectRedis()
+	storedToken, err := client.Get(context.Background(), claims["sub"].(string)).Result()
+	if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token", "message": err.Error()})
+			c.Abort()
+			return
+	}
+
+	if storedToken != tokenString {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid refresh token"})
+			c.Abort()
+			return
+	}
 	if ok {
 		c.Set("user_id", claims["sub"])
 	}
-
 	return 
 }

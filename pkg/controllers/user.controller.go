@@ -8,6 +8,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/utils"
 	"fmt"
+	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb"
 )
 
 type UserController struct {
@@ -131,4 +132,38 @@ func (uc *UserController) AccessTokenRefresh (c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"accessToken": newAccessToken})
 
+}
+
+func (uc *UserController) RevokeRefreshToken(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			return
+	}
+
+	userIDStr, ok := userID.(string)
+	if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to convert user ID to string"})
+			return
+	}
+
+	redisClient := database.ConnectRedis()
+	
+	count, err := redisClient.Exists(c, userIDStr).Result()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check refresh token existence"})
+		return
+	}
+
+	if count == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Refresh token not found"})
+		return
+	}
+	err = redisClient.Del(c, userIDStr).Err()
+	if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to revoke refresh token"})
+			return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Refresh token revoked"})
 }

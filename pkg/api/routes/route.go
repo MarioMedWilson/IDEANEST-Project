@@ -1,8 +1,6 @@
 package routes
 
 import (
-	// "example/test/api/controllers"
-	// "example/test/api/middleware"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/controllers"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/api/middleware"
 	"github.com/gin-gonic/gin"
@@ -16,7 +14,7 @@ func SetupUserRoutes(router *gin.RouterGroup, uc controllers.UserController) {
 	router.POST("/signin", uc.SignIn)
 	router.POST("/refresh-token", uc.AccessTokenRefresh)
 	router.GET("/validate", middleware.AccessTokenValidate, uc.UserValidation)
-
+	router.POST("/revoke-refresh-token", middleware.AccessTokenValidate, uc.RevokeRefreshToken)
 }
 
 func SetupOrganizationRoutes(router *gin.RouterGroup, oc controllers.OrganizationController) {

@@ -7,6 +7,9 @@ import (
 	"log"
 	"time"
 	"fmt"
+	"os"
+	"github.com/go-redis/redis/v8"
+	"github.com/joho/godotenv"
 )
 
 var DB *mongo.Database
@@ -27,4 +30,17 @@ func ConnectMongoDB(uri, dbName string) *mongo.Database {
 	DB = client.Database(dbName)
 	fmt.Println("Connected to MongoDB!")
 	return DB
+}
+
+
+func ConnectRedis() *redis.Client {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	return redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_ADDR"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+		DB:       1,
+	})
 }
