@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/utils"
-	"fmt"
 	"github.com/MarioMedWilson/IDEANEST-Project/pkg/database/mongodb"
 )
 
@@ -34,7 +33,6 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	fmt.Println(existingUser)
 	if existingUser != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "user already exists"})
 		return
@@ -78,7 +76,6 @@ func (uc *UserController) SignIn(c *gin.Context) {
 
 	
 	refreshToken, err := utils.GenerateRefreshToken(existingUser.ID)
-	fmt.Println(err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate refresh token"})
 		return
