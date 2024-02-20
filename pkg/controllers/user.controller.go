@@ -78,6 +78,7 @@ func (uc *UserController) SignIn(c *gin.Context) {
 
 	
 	refreshToken, err := utils.GenerateRefreshToken(existingUser.ID)
+	fmt.Println(err)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate refresh token"})
 		return

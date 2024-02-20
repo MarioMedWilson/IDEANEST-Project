@@ -21,8 +21,6 @@ func SetupOrganizationRoutes(router *gin.RouterGroup, oc controllers.Organizatio
 	router.POST("/create", middleware.AccessTokenValidate, oc.CreateOrganization)
 	router.GET("/", middleware.AccessTokenValidate, oc.GetOrganizations)
 	router.GET("/:id", middleware.AccessTokenValidate, oc.GetOrganizationID)
-	
-	
 	router.POST("/:id/invite", middleware.AccessTokenValidate, oc.InviteUser)
 	router.GET("/invite", middleware.AccessTokenValidate, oc.OrganizationUserInvitedTo)
 
